@@ -56,7 +56,8 @@ function draw() {
     rect(500, 400, 250, 200);
     //trash
     fill("gray");
-    
+    rect(775, 450, 100, 150);
+
     //note
     fill("yellow");
     rect(10, 385, 250, 225);
