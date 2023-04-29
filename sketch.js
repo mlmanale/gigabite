@@ -3,6 +3,7 @@ let gameStart = true;
 function setup() {
   createCanvas(900, 600);
   textAlign(CENTER);
+  rectMode(CENTER);
 }
 
 function draw() {
@@ -14,55 +15,58 @@ function draw() {
 
   //if(!gameStart) {
     background("gray");
+      fill("white");
+      rect(450, 225, 900, 250)
 
-    //gui elements
-    fill('yellow');
-    rect(10, 10, 350, 80);
-    rect(700, 10, 190, 80);
-    //tiles
-    fill("white");
-    rect(0, 100, 900, 250);
+      //HUD/gui
+      fill("yellow");
+      rect(185, 50, 350, 80);
+      rect(795, 50, 190, 80);
 
-    //counter
-    fill(0,255,00);
-    rect(0, 250, 900, 150);
+      //counter
+      fill(0,255,0);
+      rect(450, 325, 900, 150)
 
-    //counter edge
-    fill("green");
-    rect(0, 350, 900, 25);
+      //counter edge
+      fill("green");
+      rect(450, 362.5, 900, 25);
 
-    //bottom drawers
-    fill("blue");
-    rect(0, 375, 900, 250);
-    fill("red");
+      //bottom drawers
+      fill("blue");
+      rect(450, 487.5, 900, 225);
 
     //interactive elements
-    fill("red");
+    
     //grinder
-    rect(15, 135, 100, 200);
+    fill("red");
+    rect(65, 235, 100, 200);
+
     //espresso machine
-    rect(200, 155, 250, 180);
+    rect(335, 245, 270, 180);
+
     //syrups
-    rect(500, 140, 60, 195);
-    rect(570, 140, 60, 195);
-    rect(640, 140, 60, 195);
-    rect(710, 140, 60, 195);
+    rect(545, 252.5, 50, 165);
+    rect(605, 252.5, 50, 165);
+    rect(665, 252.5, 50, 165);
+    rect(725, 252.5, 50, 165);
+
     //cups
-    rect(785, 170, 50, 165);
-    rect(840, 170, 50, 165);
-    //fridge and freezer
+    rect(810, 267.5, 50, 135);
+    rect(865, 262.5, 50, 145);
+
+    //frige and freezer
     fill("purple");
-    rect(250, 400, 250, 200);
-    rect(500, 400, 250, 200);
+    rect(375,500, 250, 200);
+    rect(625, 500, 250, 200);
+
     //trash
     fill("gray");
-    rect(775, 450, 100, 150);
+    rect(825, 525, 100, 150);
 
     //note
     fill("yellow");
-    rect(10, 385, 250, 225);
+    rect(135, 495, 250, 220);
 
-  //}
 }
 
 function keyPressed() {
