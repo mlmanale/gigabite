@@ -1,3 +1,4 @@
+//gamestates
 let gameStart = true;
 let espresso = false;
 let syrup = false;
@@ -5,14 +6,24 @@ let fridge = false;
 let freezer = false;
 let recipes = false;
 
+//syrup imgs
+let caramel, vanilla, mocha, brownSugar;
+
+let noteY = 655;
+
 function preload() {
   //anims and sprites will go here!
+  caramel = loadImage("img/caramelbig.png");
+  vanilla = loadImage("img/vanillabig.png");
+  mocha = loadImage("img/mochabig.png");
+  brownSugar = loadImage("img/bsbig.png");
 }
 
 function setup() {
   createCanvas(900, 600);
   textAlign(CENTER);
   rectMode(CENTER);
+  imageMode(CENTER);
 }
 
 function draw() {
@@ -22,6 +33,9 @@ function draw() {
   //   text("Press enter to begin!", width/2, height/2);
   // }
 
+  // if (mouseIsPressed) {
+  //   console.log(mouseX, mouseY);
+  // }
 
   if(!espresso && !syrup && !fridge && !freezer && !recipes) {
     background("gray");
@@ -52,10 +66,10 @@ function draw() {
     rect(360, 235, 300, 200);
   
     //syrups
-    rect(560, 252.5, 50, 165);
-    rect(620, 252.5, 50, 165);
-    rect(680, 252.5, 50, 165);
-    rect(740, 252.5, 50, 165);
+    image(caramel, 560, 252.5, 50, 165);
+    image(vanilla, 620, 252.5, 50, 165);
+    image(mocha, 680, 252.5, 50, 165);
+    image(brownSugar, 740, 252.5, 50, 165);
   
     //cups
     rect(810, 267.5, 50, 135);
@@ -133,12 +147,11 @@ function draw() {
     fill("red");
     rect(450, 350, 600, 400);
 
+    
     //back button
-    fill("yellow");
-    rect(75, 125, 130, 50);
-
+    backButton();
     //note
-    rect(135, 495, 250, 220);
+    orderNote();
 
     push();
     fill(0,0,0, 127);
@@ -157,10 +170,6 @@ function draw() {
     //gui/hud
     rect(185, 50, 350, 80);
     rect(795, 50, 190, 80);
-    
-
-    //back button
-    rect(75, 125, 130, 50);
 
     //counter
     fill(0,255,0);
@@ -172,14 +181,15 @@ function draw() {
 
     //syrups - original size x2.5
     fill("red");
-    rect(225, 340, 125, 412.5);
-    rect(375, 340, 125, 412.5);
-    rect(525, 340, 125, 412.5);
-    rect(675, 340, 125, 412.5);
+    image(caramel, 225, 340, 125, 412.5);
+    image(vanilla, 375, 340, 125, 412.5);
+    image(mocha, 525, 340, 125, 412.5);
+    image(brownSugar, 675, 340, 125, 412.5);
     
+    //back button
+    backButton();
     //note
-    fill("yellow");
-    rect(135, 495, 250, 220);
+    orderNote();
 
     push();
       fill(0,0,0, 127);
@@ -206,12 +216,9 @@ function draw() {
 
 
     //back button
-    fill("yellow");
-    rect(75, 125, 130, 50)
-
+    backButton();
     //note
-    rect(135, 495, 250, 220);
-
+    orderNote();
 
     push();
       fill(0,0,0, 127);
@@ -219,9 +226,6 @@ function draw() {
         rect(75, 125, 130, 50); 
       }
     pop();
-
-   
-
   } //END FREEZER
 
   //FRIDGE
@@ -240,11 +244,11 @@ function draw() {
     rect(137.5, 375, 275, 500);
 
     //back button
-    fill("yellow");
-    rect(75, 125, 130, 50)
+    backButton();
 
     //note
-    rect(135, 495, 250, 220);
+    orderNote();
+
     push();
       fill(0,0,0, 127);
       if ((mouseX >= 10 && mouseX <= 140) && (mouseY >= 100 && mouseY <= 150)) {
@@ -253,6 +257,9 @@ function draw() {
     pop();
   } //END FREEZER
 
+  if(mouseIsPressed){
+    console.log(mouseX, mouseY);
+  }
 }
 
 function keyPressed() {
@@ -323,6 +330,28 @@ function mousePressed() {
       espresso = false;
     }
   }
+
 }
 
+function backButton () {
+  fill("yellow");
+  rect(75, 125, 130, 50)
+}
+
+function orderNote () {
+  fill("yellow");
+  rect(135, noteY, 250, 220);
+  if((mouseX >= 10 && mouseX <=260)&&(mouseY >= 565 && mouseY <=600))
+  {
+    if(noteY >= 495) {
+      noteY -= 20;
+    }
+  }
+  else {
+    if(noteY <= 655) {
+      noteY += 20;
+    }
+  } 
+
+}
 
