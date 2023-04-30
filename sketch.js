@@ -1,15 +1,63 @@
 //gamestates
 let gameStart = true;
 let espresso = false;
-let syrup = false;
+let syrup = true;
 let fridge = false;
 let freezer = false;
 let recipes = false;
 
+
 //syrup imgs
 let caramel, vanilla, mocha, brownSugar;
+//cold latte images
+let cupimg, coldcup, icecup;
+//cup with syrup spritesheet
+let cupsheet;
+let frame = 0;
 
 let noteY = 655;
+
+//cup class
+
+class Cup {
+  constructor() {
+    //this.ss = spriteSheet;
+    this.x = mouseX;
+    this.y = mouseY;
+    this.width = 50;
+    this.height = 75;
+    this.bigWidth = 125;
+    this.bigHeight = 187.5;
+    this.spawn = false;
+    this.trashed = false;
+    this.ice = false;
+  }
+
+  draw() {
+    fill("yellow");
+    if(!this.ice) {
+      cupimg = coldcup;
+    }
+    else if (this.ice){
+      cupimg = icecup;
+    }
+
+    if(!espresso && !syrup && !fridge && !freezer && !recipes) {
+      //image(cupimg, mouseX, mouseY, 50, 75);
+      image(cupsheet, mouseX, mouseY, 50, 75, frame*150, 0, 150, 225 );
+    }
+    else if (espresso || syrup || fridge || freezer) {
+      //image(cupimg, mouseX, mouseY,125, 187.5);
+      image(cupsheet, mouseX, mouseY, 125, 187.5, frame*150, 0, 150, 225);
+    }
+  }
+
+  update() {
+    if (this.spawn && !this.trashed) {
+      this.draw();
+    }
+  }
+}
 
 function preload() {
   //anims and sprites will go here!
@@ -17,6 +65,10 @@ function preload() {
   vanilla = loadImage("img/vanillabig.png");
   mocha = loadImage("img/mochabig.png");
   brownSugar = loadImage("img/bsbig.png");
+  coldcup = loadImage("img/cup.png");
+  icecup = loadImage("img/cupice.png");
+  cupsheet = loadImage("img/syrupcup.png");
+  coffee = new Cup();
 }
 
 function setup() {
@@ -24,6 +76,7 @@ function setup() {
   textAlign(CENTER);
   rectMode(CENTER);
   imageMode(CENTER);
+  
 }
 
 function draw() {
@@ -36,7 +89,7 @@ function draw() {
   // if (mouseIsPressed) {
   //   console.log(mouseX, mouseY);
   // }
-
+  
   if(!espresso && !syrup && !fridge && !freezer && !recipes) {
     background("gray");
     
@@ -124,6 +177,7 @@ function draw() {
         rect(795, 50, 190, 80);
       }
     pop();
+    
   }
   
   //ESPRESSO
@@ -159,7 +213,6 @@ function draw() {
       rect(75, 125, 130, 50); 
     }
     pop();
-
   }
 
   //SYRUP
@@ -197,7 +250,9 @@ function draw() {
         rect(75, 125, 130, 50); 
       }
     pop();
-
+    if(mouseIsPressed) {
+      console.log(mouseX,mouseY);
+    }
   } //END SYRUP
   
   if(freezer) {
@@ -256,10 +311,8 @@ function draw() {
       }
     pop();
   } //END FREEZER
-
-  if(mouseIsPressed){
-    console.log(mouseX, mouseY);
-  }
+  
+  coffee.update();
 }
 
 function keyPressed() {
@@ -270,52 +323,60 @@ function keyPressed() {
 }
 
 function mousePressed() {
-  //grinder
-  if(!espresso && !syrup && !fridge && !freezer && !recipes) {
-    
-    //espresso
-    if ((mouseX >= 210 && mouseX <= 510) && (mouseY >= 135 && mouseY <= 335)) {
-      espresso = true;
-    }
-    //syrups
-    else if ((mouseX >= 535 && mouseX <= 765) && (mouseY >= 170 && mouseY <= 335)) {
-      syrup = true;
-      console.log("syrup");
-    }
-    // //cold cup
-    // else if ((mouseX >= 785 && mouseX <= 835) && (mouseY >= 200 && mouseY <= 335)) {
-    //   
-    // }
-    // //hot cups
-    // else if ((mouseX >= 840 && mouseX <= 890) && (mouseY >= 190 && mouseY <= 335)) {
-    //   
-    // }
-    //freezer
-    else if ((mouseX >= 260 && mouseX < 500) && (mouseY >= 400 && mouseY <= 600)) {
-      freezer = true;
-    }
-    //fridge
-    else if ((mouseX >= 500 && mouseX <= 750) && (mouseY >= 400 && mouseY <= 600)) {
-      fridge = true;
-    }
-    //trash
-    // else if ((mouseX >= 775 && mouseX <= 875) && (mouseY >= 450 && mouseY <= 600)) {
-    
-    // }
-    //recipes
-    // else if ((mouseX >= 700 && mouseX <= 890) && (mouseY >= 10 && mouseY <= 90)) { 
-    // }
-  }
-  //back buttons
+  //back buttons and zoomed screen interactions
   if(syrup) {
     if ((mouseX >= 10 && mouseX <= 140) && (mouseY >= 100 && mouseY <= 150)) {
       syrup = false;
+    }
+
+    //caramel
+    if ((mouseX >= 162.5 && mouseX <= 287.5) && (mouseY >= 135 && mouseY <= 547.5) && coffee.spawn) {
+      if(frame == 0) {
+        frame = 1;
+      }
+      else if(frame == 1) {
+        frame = 5;
+      }
+    }
+
+    //vanilla
+    if ((mouseX >= 312.5 && mouseX <= 437.5) && (mouseY >= 135 && mouseY <= 547.5) && coffee.spawn) {
+      if(frame == 0) {
+        frame = 4;
+      }
+      else if(frame == 4) {
+        frame = 8;
+      }
+    }
+
+    //mocha 
+    if ((mouseX >= 462.5 && mouseX <= 587.5) && (mouseY >= 135 && mouseY <= 547.5) && coffee.spawn) {
+      if(frame == 0) {
+        frame = 3;
+      }
+      else if(frame == 3) {
+        frame = 7;
+      }
+    }
+
+    //brown sugar 
+    if ((mouseX >= 612.5 && mouseX <= 737.5) && (mouseY >= 135 && mouseY <= 547.5) && coffee.spawn) {
+      if(frame == 0) {
+        frame = 2;
+      }
+      else if(frame == 2) {
+        frame = 6;
+      }
     }
   }
   
   if(freezer) {
     if ((mouseX >= 10 && mouseX <= 140) && (mouseY >= 100 && mouseY <= 150)) {
       freezer = false;
+    }
+    if ((mouseX >=0 && mouseX <= 625) &&(mouseY >= 125 && mouseY <= 600)) {
+        coffee.ice = true;
+        console.log("test");
     }
   }
 
@@ -331,6 +392,51 @@ function mousePressed() {
     }
   }
 
+  //enter zoomed screens
+  if(!espresso && !syrup && !fridge && !freezer && !recipes) {
+    
+    //espresso
+    if ((mouseX >= 210 && mouseX <= 510) && (mouseY >= 135 && mouseY <= 335)) {
+      espresso = true;
+    }
+    //syrups
+    else if ((mouseX >= 535 && mouseX <= 765) && (mouseY >= 170 && mouseY <= 335)) {
+      syrup = true;
+    }
+    //cold cup
+    else if ((mouseX >= 785 && mouseX <= 835) && (mouseY >= 200 && mouseY <= 335)) {
+      coffee.spawn = true;
+      console.log("cold cup");
+    }
+    //hot cups
+    else if ((mouseX >= 840 && mouseX <= 890) && (mouseY >= 190 && mouseY <= 335)) {
+      coffee.spawn = true;
+      console.log("hot cup");
+    }
+    //freezer
+    else if ((mouseX >= 260 && mouseX < 500) && (mouseY >= 400 && mouseY <= 600)) {
+      freezer = true;
+    }
+    //fridge
+    else if ((mouseX >= 500 && mouseX <= 750) && (mouseY >= 400 && mouseY <= 600)) {
+      fridge = true;
+    }
+    //trash
+    else if ((mouseX >= 775 && mouseX <= 875) && (mouseY >= 450 && mouseY <= 600)) {
+      coffee.trashed = true;
+      console.log("pressed trash");
+      setTimeout(()=>{
+        coffee.trashed = false;
+        coffee.spawn = false;
+        coffee.ice = false;
+        frame = 0;
+      }, 500)
+      }
+    //recipes
+    // else if ((mouseX >= 700 && mouseX <= 890) && (mouseY >= 10 && mouseY <= 90)) { 
+    // }
+    }
+  
 }
 
 function backButton () {
