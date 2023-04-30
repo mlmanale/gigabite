@@ -1,7 +1,7 @@
 //gamestates
 let gameStart = true;
 let espresso = false;
-let syrup = true;
+let syrup = false;
 let fridge = false;
 let freezer = false;
 let recipes = false;
@@ -125,6 +125,7 @@ function draw() {
     image(brownSugar, 740, 252.5, 50, 165);
   
     //cups
+    fill("red");
     rect(810, 267.5, 50, 135);
     rect(865, 262.5, 50, 145);
   
@@ -176,7 +177,12 @@ function draw() {
       else if ((mouseX >= 700 && mouseX <= 890) && (mouseY >= 10 && mouseY <= 90)) {
         rect(795, 50, 190, 80);
       }
+      
     pop();
+    fill("white");
+    text("cup", 810, 267.5);
+    text("espresso", 360, 235);
+    text("trash", 825, 525);
     
   }
   
@@ -201,7 +207,6 @@ function draw() {
     fill("red");
     rect(450, 350, 600, 400);
 
-    
     //back button
     backButton();
     //note
