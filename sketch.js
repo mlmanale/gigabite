@@ -180,9 +180,9 @@ function draw() {
         rect(825, 525, 100, 150);
       }
       //recipes
-      else if ((mouseX >= 700 && mouseX <= 890) && (mouseY >= 10 && mouseY <= 90)) {
-        rect(795, 50, 190, 80);
-      }
+      // else if ((mouseX >= 700 && mouseX <= 890) && (mouseY >= 10 && mouseY <= 90)) {
+      //   rect(795, 50, 190, 80);
+      // }
 
     pop();
     fill("white");
@@ -268,7 +268,7 @@ function draw() {
     rect(587.5, 375, 625, 500);
     //freezer edge
     rect(137.5, 375, 275, 500);
-    
+
   } //END FREEZER
 
   //backbutton for gamestates
@@ -277,6 +277,17 @@ function draw() {
       backButton();
       orderNote();
    }
+
+   if (recipes) {
+     background("gray");
+     backButton();
+    
+     fill("white");
+     rect(450, 350, 600, 400);
+
+     fill("black");
+     text("iced caramel latte", 450, 200);
+   }
   
   coffee.update();
 
@@ -284,6 +295,13 @@ function draw() {
   fill("yellow");
   rect(185, 50, 350, 80);
   rect(795, 50, 190, 80);
+
+  if ((mouseX >= 700 && mouseX <= 890) && (mouseY >= 10 && mouseY <= 90)) {
+    fill(0,0,0,127);
+    rect(795, 50, 190, 80);
+  }
+  fill("black");
+  text("instructions", 795, 50);
 
 }
 
@@ -364,9 +382,14 @@ function mousePressed() {
     }
   }
 
+  if(recipes) {
+    if ((mouseX >= 10 && mouseX <= 140) && (mouseY >= 100 && mouseY <= 150)) {
+      recipes = false;
+    }
+  }
+
   //enter zoomed screens
-  if(!espresso && !syrup && !fridge && !freezer && !recipes) {
-    
+  if(!espresso && !syrup && !fridge && !freezer) {
     //espresso
     if ((mouseX >= 210 && mouseX <= 510) && (mouseY >= 135 && mouseY <= 335)) {
       espresso = true;
@@ -394,7 +417,7 @@ function mousePressed() {
       fridge = true;
     }
     //trash
-    else if ((mouseX >= 775 && mouseX <= 875) && (mouseY >= 450 && mouseY <= 600) && !cupSet) {
+    else if ((mouseX >= 775 && mouseX <= 875) && (mouseY >= 450 && mouseY <= 600) && !cupSet && coffee.spawn) {
       coffee.trashed = true;
       trashframe = 1;
       console.log("pressed trash");
@@ -406,10 +429,6 @@ function mousePressed() {
         trashframe = 0;
       }, 500)
       }
-    
-      //recipes
-    // else if ((mouseX >= 700 && mouseX <= 890) && (mouseY >= 10 && mouseY <= 90)) { 
-    // }
 
     else if ((mouseX >= 115 && mouseX <= 195) && (mouseY >= 285 && mouseY <= 335) && coffee.spawn && !coffee.trashed) {
       if(!cupSet){
@@ -417,6 +436,10 @@ function mousePressed() {
       }
       else {cupSet = false;}
     }
+    }
+    //recipes
+    if ((mouseX >= 700 && mouseX <= 890) && (mouseY >= 10 && mouseY <= 90) && !recipes) { 
+      recipes = true;
     }
 }
 
