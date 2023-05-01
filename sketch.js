@@ -22,6 +22,10 @@ let cupimg, coldcup, icecup;
 let cupsheet;
 let frame = 0;
 
+//trash
+let trashcan;
+let trashframe = 0;
+
 let noteY = 655;
 
 //cup class
@@ -71,6 +75,7 @@ function preload() {
   coldcup = loadImage("img/cup.png");
   icecup = loadImage("img/cupice.png");
   cupsheet = loadImage("img/syrupcup.png");
+  trashcan = loadImage("img/trashcan.png");
   coffee = new Cup();
 }
 
@@ -98,11 +103,6 @@ function draw() {
     
     fill("white");
     rect(450, 225, 900, 250)
-  
-    //HUD/gui
-    fill("yellow");
-    rect(185, 50, 350, 80);
-    rect(795, 50, 190, 80);
   
     //counter
     fill(0,255,0);
@@ -138,8 +138,7 @@ function draw() {
     rect(625, 500, 250, 200);
   
     //trash
-    fill("gray");
-    rect(825, 525, 100, 150);
+    image(trashcan, 825, 525, 100, 150, trashframe*100, 0, 100, 150);
   
     //note
     fill("yellow");
@@ -189,24 +188,17 @@ function draw() {
     fill("white");
     text("cup", 810, 267.5);
     text("espresso", 360, 235);
-    text("trash", 825, 525);
     text("set cup down", 155, 310);
 
     if(mouseIsPressed) {
       console.log(mouseX, mouseY);
     }
-    
   }
   
-  //ESPRESSO
-  if (espresso) {
+  //counter for gamestates
+  if (espresso || syrup) {
     background("gray");
 
-    fill("yellow");
-    //gui/hud
-    rect(185, 50, 350, 80);
-    rect(795, 50, 190, 80);
-    
     //counter
     fill(0,255,0);
     rect(450, 500, 900, 150);
@@ -214,15 +206,13 @@ function draw() {
     //counter edge
     fill("green");
     rect(450, 587.5, 900, 25);
-
+  }
+  
+  //ESPRESSO
+  if (espresso) {
     //espresso machine x2
     fill("red");
     rect(450, 350, 600, 400);
-
-    //back button
-    backButton();
-    //note
-    orderNote();
 
     push();
     fill(0,0,0, 127);
@@ -234,21 +224,6 @@ function draw() {
 
   //SYRUP
   if (syrup) {
-    background("gray");
-    
-    fill("yellow");
-    //gui/hud
-    rect(185, 50, 350, 80);
-    rect(795, 50, 190, 80);
-
-    //counter
-    fill(0,255,0);
-    rect(450, 500, 900, 150);
-
-    //counter edge
-    fill("green");
-    rect(450, 587.5, 900, 25);
-
     //syrups - original size x2.5
     fill("red");
     image(caramel, 225, 340, 125, 412.5);
@@ -256,11 +231,6 @@ function draw() {
     image(mocha, 525, 340, 125, 412.5);
     image(brownSugar, 675, 340, 125, 412.5);
     
-    //back button
-    backButton();
-    //note
-    orderNote();
-
     push();
       fill(0,0,0, 127);
       if ((mouseX >= 10 && mouseX <= 140) && (mouseY >= 100 && mouseY <= 150)) {
@@ -274,23 +244,12 @@ function draw() {
   
   if(freezer) {
     background("gray");
-    
-    fill("yellow");
-    //gui/hud
-    rect(185, 50, 350, 80);
-    rect(795, 50, 190, 80);
-    
+ 
     fill("purple");
     //freezer original x2.5
     rect(312.5, 375, 625, 500);
     //fridge edge
     rect(762.5, 375, 275, 500);
-
-
-    //back button
-    backButton();
-    //note
-    orderNote();
 
     push();
       fill(0,0,0, 127);
@@ -303,33 +262,29 @@ function draw() {
   //FRIDGE
   if(fridge) {
     background("gray");
-    
-    fill("yellow");
-    //gui/hud
-    rect(185, 50, 350, 80);
-    rect(795, 50, 190, 80);
 
     fill("purple");
     //fridge original x2.5
     rect(587.5, 375, 625, 500);
     //freezer edge
     rect(137.5, 375, 275, 500);
-
-    //back button
-    backButton();
-
-    //note
-    orderNote();
-
-    push();
-      fill(0,0,0, 127);
-      if ((mouseX >= 10 && mouseX <= 140) && (mouseY >= 100 && mouseY <= 150)) {
-        rect(75, 125, 130, 50); 
-      }
-    pop();
+    
   } //END FREEZER
+
+  //backbutton for gamestates
+  if (espresso || syrup || fridge || freezer)
+   {
+      backButton();
+      orderNote();
+   }
   
   coffee.update();
+
+  //HUD and GUI
+  fill("yellow");
+  rect(185, 50, 350, 80);
+  rect(795, 50, 190, 80);
+
 }
 
 function keyPressed() {
@@ -441,15 +396,18 @@ function mousePressed() {
     //trash
     else if ((mouseX >= 775 && mouseX <= 875) && (mouseY >= 450 && mouseY <= 600) && !cupSet) {
       coffee.trashed = true;
+      trashframe = 1;
       console.log("pressed trash");
       setTimeout(()=>{
         coffee.trashed = false;
         coffee.spawn = false;
         coffee.ice = false;
         frame = 0;
+        trashframe = 0;
       }, 500)
       }
-    //recipes
+    
+      //recipes
     // else if ((mouseX >= 700 && mouseX <= 890) && (mouseY >= 10 && mouseY <= 90)) { 
     // }
 
@@ -460,12 +418,16 @@ function mousePressed() {
       else {cupSet = false;}
     }
     }
-  
 }
 
 function backButton () {
   fill("yellow");
   rect(75, 125, 130, 50)
+
+  fill(0,0,0, 127);
+  if ((mouseX >= 10 && mouseX <= 140) && (mouseY >= 100 && mouseY <= 150)) {
+    rect(75, 125, 130, 50); 
+  }
 }
 
 function orderNote () {
@@ -482,6 +444,4 @@ function orderNote () {
       noteY += 20;
     }
   } 
-
 }
-
