@@ -6,6 +6,13 @@ let fridge = false;
 let freezer = false;
 let recipes = false;
 
+//cup variables
+let cupW = 50;
+let cupH = 75;
+let cupBigW = 125;
+let cupBigH = 187.5;
+let cupSet = false;
+
 
 //syrup imgs
 let caramel, vanilla, mocha, brownSugar;
@@ -22,12 +29,6 @@ let noteY = 655;
 class Cup {
   constructor() {
     //this.ss = spriteSheet;
-    this.x = mouseX;
-    this.y = mouseY;
-    this.width = 50;
-    this.height = 75;
-    this.bigWidth = 125;
-    this.bigHeight = 187.5;
     this.spawn = false;
     this.trashed = false;
     this.ice = false;
@@ -42,14 +43,16 @@ class Cup {
       cupimg = icecup;
     }
 
-    if(!espresso && !syrup && !fridge && !freezer && !recipes) {
-      //image(cupimg, mouseX, mouseY, 50, 75);
-      image(cupsheet, mouseX, mouseY, 50, 75, frame*150, 0, 150, 225 );
+    if(!espresso && !syrup && !fridge && !freezer && !recipes && !cupSet) {
+      image(cupsheet, mouseX, mouseY, cupW, cupH, frame*150, 0, 150, 225 );
     }
-    else if (espresso || syrup || fridge || freezer) {
-      //image(cupimg, mouseX, mouseY,125, 187.5);
-      image(cupsheet, mouseX, mouseY, 125, 187.5, frame*150, 0, 150, 225);
+    else if ((espresso || syrup || fridge || freezer) && !cupSet) {
+      image(cupsheet, mouseX, mouseY, cupBigW, cupBigH, frame*150, 0, 150, 225);
     }
+    if (!espresso && !syrup && !fridge && !freezer && !recipes && cupSet) {
+      image(cupsheet, 155, 295, cupW, cupH, frame*150, 0, 150, 225 );
+    }
+
   }
 
   update() {
@@ -141,6 +144,10 @@ function draw() {
     //note
     fill("yellow");
     rect(135, 495, 250, 220);
+
+    //set cup down
+    fill("gray");
+    rect(155, 310, 80, 50);
       
     //mouse hover feature for interactive items
     push();
@@ -177,12 +184,17 @@ function draw() {
       else if ((mouseX >= 700 && mouseX <= 890) && (mouseY >= 10 && mouseY <= 90)) {
         rect(795, 50, 190, 80);
       }
-      
+
     pop();
     fill("white");
     text("cup", 810, 267.5);
     text("espresso", 360, 235);
     text("trash", 825, 525);
+    text("set cup down", 155, 310);
+
+    if(mouseIsPressed) {
+      console.log(mouseX, mouseY);
+    }
     
   }
   
@@ -427,7 +439,7 @@ function mousePressed() {
       fridge = true;
     }
     //trash
-    else if ((mouseX >= 775 && mouseX <= 875) && (mouseY >= 450 && mouseY <= 600)) {
+    else if ((mouseX >= 775 && mouseX <= 875) && (mouseY >= 450 && mouseY <= 600) && !cupSet) {
       coffee.trashed = true;
       console.log("pressed trash");
       setTimeout(()=>{
@@ -440,6 +452,13 @@ function mousePressed() {
     //recipes
     // else if ((mouseX >= 700 && mouseX <= 890) && (mouseY >= 10 && mouseY <= 90)) { 
     // }
+
+    else if ((mouseX >= 115 && mouseX <= 195) && (mouseY >= 285 && mouseY <= 335) && coffee.spawn && !coffee.trashed) {
+      if(!cupSet){
+        cupSet = true;
+      }
+      else {cupSet = false;}
+    }
     }
   
 }
