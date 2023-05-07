@@ -66,6 +66,38 @@ class Cup {
   }
 }
 
+
+//general interactable item class
+class Item {
+  constructor(img, x, y, w, h) {
+    this.img = img;
+    this.x = x;
+    this.y =y;
+    this.w = w;
+    this.h = h;
+  }
+
+  draw() {
+    image(this.img, this.x, this.y, this.w, this.h);
+  }
+
+}
+
+class AnimatedItem {
+  constructor(img, x, y, w, h, frame){
+    this.img = img;
+    this.x = x;
+    this.y =y;
+    this.w = w;
+    this.h = h;
+    this.frame = frame;
+  }
+  
+  draw() {
+    image(this.img, this.x, this.y, this.w, this.h, this.frame*this.w, 0, this.w, this.h);
+  }
+}
+
 function preload() {
   //anims and sprites will go here!
   caramel = loadImage("img/caramelbig.png");
@@ -76,7 +108,12 @@ function preload() {
   icecup = loadImage("img/cupice.png");
   cupsheet = loadImage("img/syrupcup.png");
   trashcan = loadImage("img/trashcan.png");
+  cupstack = loadImage("img/coldcupstack.png");
+  setcup = loadImage("img/setcup.png");
+  cupDown = new Item(setcup, 155, 310, 80, 50);
   coffee = new Cup();
+  trash = new AnimatedItem(trashcan, 825, 525, 100, 150, trashframe*100, 0, 100, 150);
+  //image(setcup, 155, 310, 80, 50);
 }
 
 function setup() {
@@ -99,27 +136,27 @@ function draw() {
   // }
   
   if(!espresso && !syrup && !fridge && !freezer && !recipes) {
-    background("gray");
+    background("white");
     
-    fill("white");
+    fill("gray");
     rect(450, 225, 900, 250)
   
     //counter
-    fill(0,255,0);
+    fill(66,66,66);
     rect(450, 325, 900, 150)
   
     //counter edge
-    fill("green");
+    fill(36,36,36);
     rect(450, 362.5, 900, 25);
   
     //bottom drawers
-    fill("blue");
+    fill("black");
     rect(450, 487.5, 900, 225);
   
     //interactive elements
     fill("red");
     //espresso machine
-    rect(360, 235, 300, 200);
+    rect(400, 210, 200, 250);
   
     //syrups
     image(caramel, 560, 252.5, 50, 165);
@@ -129,24 +166,23 @@ function draw() {
   
     //cups
     fill("red");
-    rect(810, 267.5, 50, 135);
-    rect(865, 262.5, 50, 145);
+    image(cupstack, 810, 267.5, 50, 135);
+    image(cupstack, 865, 262.5, 50, 145);
   
     //frige and freezer
-    fill("purple");
+    fill("gray");
     rect(375,500, 250, 200);
     rect(625, 500, 250, 200);
   
     //trash
-    image(trashcan, 825, 525, 100, 150, trashframe*100, 0, 100, 150);
+    trash.draw();
   
     //note
     fill("yellow");
     rect(135, 495, 250, 220);
 
     //set cup down
-    fill("gray");
-    rect(155, 310, 80, 50);
+    cupDown.draw();
       
     //mouse hover feature for interactive items
     push();
@@ -159,14 +195,6 @@ function draw() {
       else if ((mouseX >= 535 && mouseX <= 765) && (mouseY >= 170 && mouseY <= 335)) {
         rect(650, 252.5, 230, 165);
       }
-      //cold cup
-      else if ((mouseX >= 785 && mouseX <= 835) && (mouseY >= 200 && mouseY <= 335)) {
-        rect(810, 267.5, 50, 135);
-      }
-      //hot cups
-      else if ((mouseX >= 840 && mouseX <= 890) && (mouseY >= 190 && mouseY <= 335)) {
-        rect(865, 262.5, 50, 145);
-      }
       //freezer
       else if ((mouseX >= 260 && mouseX < 500) && (mouseY >= 400 && mouseY <= 600)) {
         rect(380,500, 240, 200);
@@ -175,24 +203,15 @@ function draw() {
       else if ((mouseX >= 500 && mouseX <= 750) && (mouseY >= 400 && mouseY <= 600)) {
         rect(625, 500, 250, 200);
       }
-      //trash
-      else if ((mouseX >= 775 && mouseX <= 875) && (mouseY >= 450 && mouseY <= 600)) {
-        rect(825, 525, 100, 150);
-      }
-      //recipes
-      // else if ((mouseX >= 700 && mouseX <= 890) && (mouseY >= 10 && mouseY <= 90)) {
-      //   rect(795, 50, 190, 80);
-      // }
-
     pop();
+    
     fill("white");
-    text("cup", 810, 267.5);
+    
     text("espresso", 360, 235);
-    text("set cup down", 155, 310);
-
-    if(mouseIsPressed) {
-      console.log(mouseX, mouseY);
-    }
+    
+    // if(mouseIsPressed) {
+    //   console.log(mouseX, mouseY);
+    // }
   }
   
   //counter for gamestates
@@ -417,26 +436,27 @@ function mousePressed() {
       fridge = true;
     }
     //trash
-    else if ((mouseX >= 775 && mouseX <= 875) && (mouseY >= 450 && mouseY <= 600) && !cupSet && coffee.spawn) {
+    else if (collision(trash) && !cupSet && coffee.spawn) {
       coffee.trashed = true;
-      trashframe = 1;
+      trash.frame = 1;
       console.log("pressed trash");
       setTimeout(()=>{
         coffee.trashed = false;
         coffee.spawn = false;
         coffee.ice = false;
         frame = 0;
-        trashframe = 0;
+        trash.frame = 0;
       }, 500)
       }
-
-    else if ((mouseX >= 115 && mouseX <= 195) && (mouseY >= 285 && mouseY <= 335) && coffee.spawn && !coffee.trashed) {
+    //set cup down
+    if(collision(cupDown) && coffee.spawn && !coffee.trashed){ 
       if(!cupSet){
         cupSet = true;
       }
       else {cupSet = false;}
     }
     }
+
     //recipes
     if ((mouseX >= 700 && mouseX <= 890) && (mouseY >= 10 && mouseY <= 90) && !recipes) { 
       recipes = true;
@@ -467,4 +487,13 @@ function orderNote () {
       noteY += 20;
     }
   } 
+}
+
+function collision (Item) {
+
+  if ((mouseX >= (Item.x - (Item.w/2)) && mouseX <= (Item.x + (Item.w/2))) && (mouseY >= (Item.y - (Item.h/2)) && mouseY <= (Item.y + (Item.h/2)))) {
+    return true;
+  }
+  else {return false;}
+
 }
