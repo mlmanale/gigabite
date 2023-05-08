@@ -12,7 +12,8 @@ let cupH = 75;
 let cupBigW = 125;
 let cupBigH = 187.5;
 let cupSet = false;
-
+let bigcupSet = false;
+let setcup;
 
 //syrup imgs
 let caramel, vanilla, mocha, brownSugar;
@@ -21,6 +22,12 @@ let cupimg, coldcup, icecup;
 //cup with syrup spritesheet
 let cupsheet;
 let frame = 0;
+
+//espresso machine
+let espressoSheet;
+let espressoFrame = 0;
+let animateEspresso = false;
+let espressoShot;
 
 //trash
 let trashcan;
@@ -47,14 +54,21 @@ class Cup {
       cupimg = icecup;
     }
 
+    //cup follows cursor on main page
     if(!espresso && !syrup && !fridge && !freezer && !recipes && !cupSet) {
       image(cupsheet, mouseX, mouseY, cupW, cupH, frame*150, 0, 150, 225 );
     }
+    //cup follows cursor on zoomed screens
     else if ((espresso || syrup || fridge || freezer) && !cupSet) {
-      image(cupsheet, mouseX, mouseY, cupBigW, cupBigH, frame*150, 0, 150, 225);
+      image(cupsheet, mouseX, mouseY, cupW*2, cupH*2, frame*150, 0, 150, 225);
     }
-    if (!espresso && !syrup && !fridge && !freezer && !recipes && cupSet) {
-      image(cupsheet, 155, 295, cupW, cupH, frame*150, 0, 150, 225 );
+    //cup set down on main page
+    else if (!espresso && !syrup && !fridge && !freezer && !recipes && cupSet) {
+      image(cupsheet, cupDown.x, 285, cupW, cupH, frame*150, 0, 150, 225 );
+    }
+    //cup set down on espresso screen
+    else if(espresso && cupSet) {
+      image(cupsheet, bigCupDown.x, 450, cupW*2, cupH*2, frame*150, 0, 150, 225 );
     }
 
   }
@@ -75,26 +89,32 @@ class Item {
     this.y =y;
     this.w = w;
     this.h = h;
+    this.moveable = false;
   }
 
   draw() {
-    image(this.img, this.x, this.y, this.w, this.h);
+    if(this.moveable) {
+      image(this.img, mouseX, mouseY, this.w, this.h);
+    }
+    if(!this.moveable) {
+      image(this.img, this.x, this.y, this.w, this.h);
+    }
   }
-
 }
 
 class AnimatedItem {
-  constructor(img, x, y, w, h, frame){
+  constructor(img, x, y, w, h, frame, scale){
     this.img = img;
     this.x = x;
     this.y =y;
     this.w = w;
     this.h = h;
     this.frame = frame;
+    this.scale = scale;
   }
   
   draw() {
-    image(this.img, this.x, this.y, this.w, this.h, this.frame*this.w, 0, this.w, this.h);
+    image(this.img, this.x, this.y, this.w, this.h, this.frame*(((this.scale*this.w))), 0, this.scale*this.w,  this.scale*this.h);
   }
 }
 
@@ -110,10 +130,23 @@ function preload() {
   trashcan = loadImage("img/trashcan.png");
   cupstack = loadImage("img/coldcupstack.png");
   setcup = loadImage("img/setcup.png");
-  cupDown = new Item(setcup, 155, 310, 80, 50);
+  filterPic = loadImage("img/filter.png");
+  espressoSheet = loadImage("img/espressomachine.png");
+  espressoShot = loadImage("img/espresso.png");
+
+
+  cupDown = new Item(setcup, 200, 310, 80, 50);
+  bigCupDown = new Item(setcup, 200, 500, 160, 100);
   coffee = new Cup();
-  trash = new AnimatedItem(trashcan, 825, 525, 100, 150, trashframe*100, 0, 100, 150);
-  //image(setcup, 155, 310, 80, 50);
+  trash = new AnimatedItem(trashcan, 825, 525, 100, 150, trashframe, 1);
+  espressoMachine = new AnimatedItem(espressoSheet, 420, 210, 200, 250, espressoFrame, 3);
+  bigEspresso = new AnimatedItem(espressoSheet, 640, 300, 400, 500, espressoFrame, 1.5);
+  cups1 = new Item(cupstack, 810, 267.5, 50, 135);
+  cups2 = new Item(cupstack, 865, 262.5, 50, 145);
+  coffeeFilter = new Item(filterPic, 280, 313, 53, 43);
+  shot1 = new Item(espressoShot, 597.5, 396, 150, 138);
+
+
 }
 
 function setup() {
@@ -129,10 +162,6 @@ function draw() {
   // if(gameStart) {
   //   fill("black");
   //   text("Press enter to begin!", width/2, height/2);
-  // }
-
-  // if (mouseIsPressed) {
-  //   console.log(mouseX, mouseY);
   // }
   
   if(!espresso && !syrup && !fridge && !freezer && !recipes) {
@@ -153,10 +182,11 @@ function draw() {
     fill("black");
     rect(450, 487.5, 900, 225);
   
-    //interactive elements
-    fill("red");
     //espresso machine
-    rect(400, 210, 200, 250);
+    espressoMachine.draw();
+    //filter
+    coffeeFilter.draw();
+    // console.log(coffeeFilter.x, coffeeFilter.y);
   
     //syrups
     image(caramel, 560, 252.5, 50, 165);
@@ -166,9 +196,9 @@ function draw() {
   
     //cups
     fill("red");
-    image(cupstack, 810, 267.5, 50, 135);
-    image(cupstack, 865, 262.5, 50, 145);
-  
+    cups1.draw();
+    cups2.draw();
+    
     //frige and freezer
     fill("gray");
     rect(375,500, 250, 200);
@@ -188,8 +218,8 @@ function draw() {
     push();
       fill(0, 0, 0, 127);
       //espresso
-      if ((mouseX >= 210 && mouseX <= 510) && (mouseY >= 135 && mouseY <= 335)) {
-        rect(360, 235, 300, 200);
+      if ((mouseX >= 320 && mouseX <= 520) && (mouseY >= 85 && mouseY <= 335)) {
+        rect(420, 210, 200, 250);
       }
       //syrups
       else if ((mouseX >= 535 && mouseX <= 765) && (mouseY >= 170 && mouseY <= 335)) {
@@ -204,14 +234,6 @@ function draw() {
         rect(625, 500, 250, 200);
       }
     pop();
-    
-    fill("white");
-    
-    text("espresso", 360, 235);
-    
-    // if(mouseIsPressed) {
-    //   console.log(mouseX, mouseY);
-    // }
   }
   
   //counter for gamestates
@@ -231,7 +253,15 @@ function draw() {
   if (espresso) {
     //espresso machine x2
     fill("red");
-    rect(450, 350, 600, 400);
+    // rect(600, 300, 400, 500);
+    bigEspresso.draw();
+    bigCupDown.draw();
+    coffeeFilter.draw();
+    coffeeFilter.h =  86;
+    coffeeFilter.w = 106;
+    coffeeFilter.x = 355;
+    coffeeFilter.y = 510;
+    
 
     push();
     fill(0,0,0, 127);
@@ -239,6 +269,7 @@ function draw() {
       rect(75, 125, 130, 50); 
     }
     pop();
+
   }
 
   //SYRUP
@@ -295,6 +326,8 @@ function draw() {
    {
       backButton();
       orderNote();
+
+      //console.log(mouseX,mouseY);
    }
 
    if (recipes) {
@@ -398,7 +431,47 @@ function mousePressed() {
   if(espresso) {
     if ((mouseX >= 10 && mouseX <= 140) && (mouseY >= 100 && mouseY <= 150)) {
       espresso = false;
+      coffeeFilter.moveable = false;
+      coffeeFilter.h =  43;
+      coffeeFilter.w = 53;
+      coffeeFilter.x = 280;
+      coffeeFilter.y = 313;
+      bigEspresso.frame = 0;
     }
+
+    if(collision(bigCupDown) && coffee.spawn && !coffee.trashed){ 
+      if(!cupSet){
+        cupSet= true;
+      }
+      else {cupSet = false;}
+    }
+
+    if(collision(coffeeFilter)) {
+      if((coffee.spawn && cupSet) || !coffee.spawn){
+        coffeeFilter.moveable = true;
+      }
+    }
+
+    if(collision(bigEspresso) && coffeeFilter.moveable) {
+      animateEspresso = true;
+      coffeeFilter.moveable = false;
+
+      let timer = setInterval(()=>{
+        if (bigEspresso.frame < 10) {
+          bigEspresso.frame ++;
+        }
+        else {
+          bigEspresso.frame = 10;
+          shot1.draw();
+          clearInterval(timer);
+        }
+      }, 500)
+    }
+
+    if(collision(shot1) && !cupSet && coffee.spawn) {
+      bigEspresso.frame = 11;
+    }
+    
   }
 
   if(recipes) {
@@ -407,10 +480,10 @@ function mousePressed() {
     }
   }
 
-  //enter zoomed screens
+  //enter zoomed screens, main screen interactions
   if(!espresso && !syrup && !fridge && !freezer) {
     //espresso
-    if ((mouseX >= 210 && mouseX <= 510) && (mouseY >= 135 && mouseY <= 335)) {
+    if (collision(espressoMachine)) {
       espresso = true;
     }
     //syrups
@@ -418,14 +491,14 @@ function mousePressed() {
       syrup = true;
     }
     //cold cup
-    else if ((mouseX >= 785 && mouseX <= 835) && (mouseY >= 200 && mouseY <= 335)) {
+    else if (collision(cups1)) {
       coffee.spawn = true;
-      console.log("cold cup");
+      // console.log("cold cup");
     }
     //hot cups
-    else if ((mouseX >= 840 && mouseX <= 890) && (mouseY >= 190 && mouseY <= 335)) {
+    else if (collision(cups2)) {
       coffee.spawn = true;
-      console.log("hot cup");
+      // console.log("hot cup");
     }
     //freezer
     else if ((mouseX >= 260 && mouseX < 500) && (mouseY >= 400 && mouseY <= 600)) {
@@ -490,10 +563,8 @@ function orderNote () {
 }
 
 function collision (Item) {
-
   if ((mouseX >= (Item.x - (Item.w/2)) && mouseX <= (Item.x + (Item.w/2))) && (mouseY >= (Item.y - (Item.h/2)) && mouseY <= (Item.y + (Item.h/2)))) {
     return true;
   }
   else {return false;}
-
 }
