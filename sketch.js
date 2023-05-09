@@ -6,6 +6,14 @@ let fridge = false;
 let freezer = false;
 let recipes = false;
 
+//timer and order stuff
+let orderTimer = 30;
+let order1 = false;
+let order2 = false;
+let order3 = false;
+let kitty1Img, kitty2Img, kitty3Img;
+
+
 //cup variables
 let cupW = 50;
 let cupH = 75;
@@ -39,6 +47,8 @@ let fridgeFrame = 0;
 let freezeFrame = 0;
 let fridgeImg, milk, freezerImg;
 let fakeFrame = 0;
+let fridgeOpen = false;
+let freezerOpen = false;
 
 let noteY = 655;
 
@@ -134,6 +144,7 @@ class AnimatedItem {
 
 function preload() {
   //anims and sprites will go here!
+  gameFont = loadFont("minecraft.ttf");
   caramel = loadImage("img/caramelbig.png");
   vanilla = loadImage("img/vanillabig.png");
   mocha = loadImage("img/mochabig.png");
@@ -150,6 +161,9 @@ function preload() {
   fridgeImg = loadImage("img/fridge.png");
   milkImg = loadImage("img/milk.png");
   freezerImg = loadImage("img/freezer.png");
+  kitty1Img = loadImage("img/kitty.png");
+  kitty2Img = loadImage("img/kitty2.png");
+  kitty3Img = loadImage("img/kitty3.png");
 
   cupDown = new Item(setcup, 200, 310, 80, 50);
   bigCupDown = new Item(setcup, 200, 500, 160, 100);
@@ -167,6 +181,14 @@ function preload() {
   bigFreezer = new AnimatedItem(freezerImg, 312.5, 375, 625, 500, freezeFrame, 1.2)
   halfFridge = new AnimatedItem(fridgeImg, 935, 375, 625, 500, fakeFrame, 1.2);
   halfFreezer = new AnimatedItem(freezerImg, -35, 375,  625, 500, fakeFrame, 1.2);
+  caramelSyrup = new Item(caramel, 560, 252.5, 50, 165);
+  vanillaSyrup = new Item(vanilla, 620, 252.5, 50, 165);
+  mochaSyrup = new Item (mocha, 680, 252.5, 50, 165);
+  bsSyrup = new Item(brownSugar, 740, 252.5, 50, 165);
+  bigCaramel = new Item(caramel, 225, 340, 125, 412.5);
+  bigVanilla = new Item(vanilla, 375, 340, 125, 412.5);
+  bigMocha = new Item(mocha, 525, 340, 125, 412.5);
+  bigBS = new Item(brownSugar, 675, 340, 125, 412.5);
   // shot1 = new Item(espressoShot, 597.5, 396, 150, 138);
 }
 
@@ -175,6 +197,8 @@ function setup() {
   textAlign(CENTER);
   rectMode(CENTER);
   imageMode(CENTER);
+  textFont(gameFont);
+  textSize(22);
 }
 
 function draw() {
@@ -183,7 +207,23 @@ function draw() {
   //   fill("black");
   //   text("Press enter to begin!", width/2, height/2);
   // }
+
+  if (frameCount % 60 == 0 && orderTimer > 0) { 
+    orderTimer --;
+  }
+
+  if(orderTimer <= 27) {
+    order1 = true;
+  }
+
+  if(orderTimer <= 20) {
+    order2 = true;
+  }
   
+  if(orderTimer <= 15) {
+    order3 = true;
+  }
+
   if(!espresso && !syrup && !fridge && !freezer && !recipes) {
     background("white");
     
@@ -209,10 +249,10 @@ function draw() {
     // console.log(coffeeFilter.x, coffeeFilter.y);
   
     //syrups
-    image(caramel, 560, 252.5, 50, 165);
-    image(vanilla, 620, 252.5, 50, 165);
-    image(mocha, 680, 252.5, 50, 165);
-    image(brownSugar, 740, 252.5, 50, 165);
+    caramelSyrup.update();
+    vanillaSyrup.update();
+    mochaSyrup.update();
+    bsSyrup.update();
   
     //cups
     fill("red");
@@ -220,6 +260,8 @@ function draw() {
     cups2.update();
     
     //frige and freezer
+    freezerOpen = false;
+    bigFreezer.frame == 0;
     smallFreezer.draw();
     smallFridge.draw();
   
@@ -227,11 +269,30 @@ function draw() {
     trash.draw();
   
     //note
-    fill("yellow");
+    noStroke();
+    fill(255, 244, 179);
     rect(135, 495, 250, 220);
 
     //set cup down
     cupDown.update();
+
+    fill("black");
+
+    if(order1) {
+      text("iced caramel latte", 135, 445); 
+      image(kitty1Img, 70, 210, 90, 90);
+  
+    }
+
+    if(order2) {
+      text("cup of milk", 135, 495);
+      image(kitty2Img, 170, 210, 90, 90);
+    }
+
+    if(order3) {
+      text("cup of ice", 135, 545);
+      image(kitty3Img, 270, 210, 90, 90);
+    }
  
   }
   
@@ -240,11 +301,11 @@ function draw() {
     background("gray");
 
     //counter
-    fill(0,255,0);
+    fill(66,66,66);
     rect(450, 500, 900, 150);
 
     //counter edge
-    fill("green");
+    fill(36,36,36);
     rect(450, 587.5, 900, 25);
   }
   
@@ -273,11 +334,10 @@ function draw() {
   //SYRUP
   if (syrup) {
     //syrups - original size x2.5
-    fill("red");
-    image(caramel, 225, 340, 125, 412.5);
-    image(vanilla, 375, 340, 125, 412.5);
-    image(mocha, 525, 340, 125, 412.5);
-    image(brownSugar, 675, 340, 125, 412.5);
+    bigCaramel.update();
+    bigVanilla.update();
+    bigMocha.update();
+    bigBS.update();
     
     push();
       fill(0,0,0, 127);
@@ -285,9 +345,6 @@ function draw() {
         rect(75, 125, 130, 50); 
       }
     pop();
-    if(mouseIsPressed) {
-      console.log(mouseX,mouseY);
-    }
   } //END SYRUP
   
   if(freezer) {
@@ -296,6 +353,11 @@ function draw() {
     fill("purple");
     bigFreezer.draw();
     halfFridge.draw();
+    
+
+    if(bigFreezer.frame == 1) {
+        freezerOpen = true;
+    }
 
     push();
       fill(0,0,0, 127);
@@ -354,14 +416,8 @@ function draw() {
   }
   fill("black");
   text("instructions", 795, 50);
+  text(orderTimer, 20, 20);
 
-}
-
-function keyPressed() {
-  if(keyCode === ENTER && gameStart) {
-      console.log("gamestart works");
-      gameStart = false;
-  }
 }
 
 function mousePressed() {
@@ -372,7 +428,7 @@ function mousePressed() {
     }
 
     //caramel
-    if ((mouseX >= 162.5 && mouseX <= 287.5) && (mouseY >= 135 && mouseY <= 547.5) && coffee.spawn) {
+    if (collision(bigCaramel) && coffee.spawn) {
       if(frame == 0) {
         frame = 1;
       }
@@ -382,7 +438,7 @@ function mousePressed() {
     }
 
     //vanilla
-    if ((mouseX >= 312.5 && mouseX <= 437.5) && (mouseY >= 135 && mouseY <= 547.5) && coffee.spawn) {
+    if (collision(bigVanilla) && coffee.spawn) {
       if(frame == 0) {
         frame = 4;
       }
@@ -392,7 +448,7 @@ function mousePressed() {
     }
 
     //mocha 
-    if ((mouseX >= 462.5 && mouseX <= 587.5) && (mouseY >= 135 && mouseY <= 547.5) && coffee.spawn) {
+    if (collision(bigMocha) && coffee.spawn) {
       if(frame == 0) {
         frame = 3;
       }
@@ -402,7 +458,7 @@ function mousePressed() {
     }
 
     //brown sugar 
-    if ((mouseX >= 612.5 && mouseX <= 737.5) && (mouseY >= 135 && mouseY <= 547.5) && coffee.spawn) {
+    if (collision(bigBS) && coffee.spawn) {
       if(frame == 0) {
         frame = 2;
       }
@@ -415,11 +471,21 @@ function mousePressed() {
   if(freezer) {
     if ((mouseX >= 10 && mouseX <= 140) && (mouseY >= 100 && mouseY <= 150)) {
       freezer = false;
+      freezerOpen = false;
       bigFreezer.frame = 0;
     }
-    if (collision(bigFreezer)) { 
+
+    if (collision(bigFreezer) && !freezerOpen) { 
         bigFreezer.frame = 1;
-        coffee.ice = true;
+    }
+
+    if(collision(bigFreezer) && coffee.spawn && !cupSet && bigFreezer.frame == 1 && freezerOpen){
+      if(frame == 0) {
+        frame = 12;
+      }
+      if (frame == 10) {
+        frame = 11;
+      }
     }
   }
 
@@ -429,11 +495,20 @@ function mousePressed() {
       bigFridge.frame = 0;
     }
 
+    if(collision(bigMilk) && coffee.spawn && !cupSet && bigFridge.frame == 1) {
+      if(frame == 0) {
+        frame = 13;
+      }
+      if(frame == 9) {
+        frame = 10;
+      }
+    }
 
     if(collision(bigFridge) && bigFridge.frame == 0 ) {
       bigFridge.frame = 1;
-    }
+    } 
   }
+
 
   if(espresso) {
     if ((mouseX >= 10 && mouseX <= 140) && (mouseY >= 100 && mouseY <= 150)) {
@@ -479,8 +554,8 @@ function mousePressed() {
 
     if(collision(bigEspresso) && !cupSet && coffee.spawn && espressoMade) {
       bigEspresso.frame = 11;
+      frame = 9;
     }
-    
   }
 
   if(recipes) {
@@ -496,7 +571,7 @@ function mousePressed() {
       espresso = true;
     }
     //syrups
-    else if ((mouseX >= 535 && mouseX <= 765) && (mouseY >= 170 && mouseY <= 335)) {
+    else if (collision(caramelSyrup) || collision(vanillaSyrup) || collision(mochaSyrup) || collision(bsSyrup)) {
       syrup = true;
     }
     //cold cup
@@ -510,11 +585,11 @@ function mousePressed() {
       // console.log("hot cup");
     }
     //freezer
-    else if ((mouseX >= 260 && mouseX < 500) && (mouseY >= 400 && mouseY <= 600)) {
+    else if (collision(smallFreezer)) {
       freezer = true;
     }
     //fridge
-    else if ((mouseX >= 500 && mouseX <= 750) && (mouseY >= 400 && mouseY <= 600)) {
+    else if (collision(smallFridge)) {
       fridge = true;
     }
     //trash
@@ -530,6 +605,7 @@ function mousePressed() {
         trash.frame = 0;
       }, 500)
       }
+
     //set cup down
     if(collision(cupDown) && coffee.spawn && !coffee.trashed){ 
       if(!cupSet){
@@ -556,8 +632,22 @@ function backButton () {
 }
 
 function orderNote () {
-  fill("yellow");
+  noStroke();
+  fill(255, 244, 179);
   rect(135, noteY, 250, 220);
+
+  fill("black");
+  if(order1) {
+    text("iced caramel latte", 135, noteY-50); 
+  }
+
+  if(order2) {
+    text("cup of milk", 135, noteY);
+  }
+
+  if(order3) {
+    text("cup of milk", 135, noteY+50);
+  }
   if((mouseX >= 10 && mouseX <=260)&&(mouseY >= 565 && mouseY <=600))
   {
     if(noteY >= 495) {
