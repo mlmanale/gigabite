@@ -28,10 +28,17 @@ let espressoSheet;
 let espressoFrame = 0;
 let animateEspresso = false;
 let espressoShot;
+let espressoMade = false;
 
 //trash
 let trashcan;
 let trashframe = 0;
+
+//fridge and freezer
+let fridgeFrame = 0;
+let freezeFrame = 0;
+let fridgeImg, milk, freezerImg;
+let fakeFrame = 0;
 
 let noteY = 655;
 
@@ -46,7 +53,6 @@ class Cup {
   }
 
   draw() {
-    fill("yellow");
     if(!this.ice) {
       cupimg = coldcup;
     }
@@ -90,6 +96,7 @@ class Item {
     this.w = w;
     this.h = h;
     this.moveable = false;
+    this.spawn = true;
   }
 
   draw() {
@@ -100,6 +107,13 @@ class Item {
       image(this.img, this.x, this.y, this.w, this.h);
     }
   }
+
+  update() {
+    if(this.spawn) {
+      this.draw();
+    }
+  }
+
 }
 
 class AnimatedItem {
@@ -133,7 +147,9 @@ function preload() {
   filterPic = loadImage("img/filter.png");
   espressoSheet = loadImage("img/espressomachine.png");
   espressoShot = loadImage("img/espresso.png");
-
+  fridgeImg = loadImage("img/fridge.png");
+  milkImg = loadImage("img/milk.png");
+  freezerImg = loadImage("img/freezer.png");
 
   cupDown = new Item(setcup, 200, 310, 80, 50);
   bigCupDown = new Item(setcup, 200, 500, 160, 100);
@@ -144,9 +160,14 @@ function preload() {
   cups1 = new Item(cupstack, 810, 267.5, 50, 135);
   cups2 = new Item(cupstack, 865, 262.5, 50, 145);
   coffeeFilter = new Item(filterPic, 280, 313, 53, 43);
-  shot1 = new Item(espressoShot, 597.5, 396, 150, 138);
-
-
+  smallFridge = new AnimatedItem(fridgeImg, 625, 500, 250, 200, fridgeFrame, 3);
+  bigFridge = new AnimatedItem(fridgeImg, 587.5, 375, 625, 500, fridgeFrame, 1.2 )
+  bigMilk = new Item(milkImg, 700, 255, 117.5, 182.5);
+  smallFreezer = new AnimatedItem(freezerImg, 375, 500, 250, 200, freezeFrame,3);
+  bigFreezer = new AnimatedItem(freezerImg, 312.5, 375, 625, 500, freezeFrame, 1.2)
+  halfFridge = new AnimatedItem(fridgeImg, 935, 375, 625, 500, fakeFrame, 1.2);
+  halfFreezer = new AnimatedItem(freezerImg, -35, 375,  625, 500, fakeFrame, 1.2);
+  // shot1 = new Item(espressoShot, 597.5, 396, 150, 138);
 }
 
 function setup() {
@@ -154,7 +175,6 @@ function setup() {
   textAlign(CENTER);
   rectMode(CENTER);
   imageMode(CENTER);
-  
 }
 
 function draw() {
@@ -185,7 +205,7 @@ function draw() {
     //espresso machine
     espressoMachine.draw();
     //filter
-    coffeeFilter.draw();
+    coffeeFilter.update();
     // console.log(coffeeFilter.x, coffeeFilter.y);
   
     //syrups
@@ -196,13 +216,12 @@ function draw() {
   
     //cups
     fill("red");
-    cups1.draw();
-    cups2.draw();
+    cups1.update();
+    cups2.update();
     
     //frige and freezer
-    fill("gray");
-    rect(375,500, 250, 200);
-    rect(625, 500, 250, 200);
+    smallFreezer.draw();
+    smallFridge.draw();
   
     //trash
     trash.draw();
@@ -212,28 +231,8 @@ function draw() {
     rect(135, 495, 250, 220);
 
     //set cup down
-    cupDown.draw();
-      
-    //mouse hover feature for interactive items
-    push();
-      fill(0, 0, 0, 127);
-      //espresso
-      if ((mouseX >= 320 && mouseX <= 520) && (mouseY >= 85 && mouseY <= 335)) {
-        rect(420, 210, 200, 250);
-      }
-      //syrups
-      else if ((mouseX >= 535 && mouseX <= 765) && (mouseY >= 170 && mouseY <= 335)) {
-        rect(650, 252.5, 230, 165);
-      }
-      //freezer
-      else if ((mouseX >= 260 && mouseX < 500) && (mouseY >= 400 && mouseY <= 600)) {
-        rect(380,500, 240, 200);
-      }
-      //fridge
-      else if ((mouseX >= 500 && mouseX <= 750) && (mouseY >= 400 && mouseY <= 600)) {
-        rect(625, 500, 250, 200);
-      }
-    pop();
+    cupDown.update();
+ 
   }
   
   //counter for gamestates
@@ -252,11 +251,10 @@ function draw() {
   //ESPRESSO
   if (espresso) {
     //espresso machine x2
-    fill("red");
-    // rect(600, 300, 400, 500);
+
     bigEspresso.draw();
-    bigCupDown.draw();
-    coffeeFilter.draw();
+    bigCupDown.update();
+    coffeeFilter.update();
     coffeeFilter.h =  86;
     coffeeFilter.w = 106;
     coffeeFilter.x = 355;
@@ -296,10 +294,8 @@ function draw() {
     background("gray");
  
     fill("purple");
-    //freezer original x2.5
-    rect(312.5, 375, 625, 500);
-    //fridge edge
-    rect(762.5, 375, 275, 500);
+    bigFreezer.draw();
+    halfFridge.draw();
 
     push();
       fill(0,0,0, 127);
@@ -313,11 +309,15 @@ function draw() {
   if(fridge) {
     background("gray");
 
-    fill("purple");
+
     //fridge original x2.5
-    rect(587.5, 375, 625, 500);
-    //freezer edge
-    rect(137.5, 375, 275, 500);
+    bigFridge.draw();
+    halfFreezer.draw();
+
+    if(bigFridge.frame == 1) {
+      bigMilk.update();
+    }
+    
 
   } //END FREEZER
 
@@ -415,16 +415,23 @@ function mousePressed() {
   if(freezer) {
     if ((mouseX >= 10 && mouseX <= 140) && (mouseY >= 100 && mouseY <= 150)) {
       freezer = false;
+      bigFreezer.frame = 0;
     }
-    if ((mouseX >=0 && mouseX <= 625) &&(mouseY >= 125 && mouseY <= 600)) {
+    if (collision(bigFreezer)) { 
+        bigFreezer.frame = 1;
         coffee.ice = true;
-        console.log("test");
     }
   }
 
   if(fridge) {
     if ((mouseX >= 10 && mouseX <= 140) && (mouseY >= 100 && mouseY <= 150)) {
       fridge = false;
+      bigFridge.frame = 0;
+    }
+
+
+    if(collision(bigFridge) && bigFridge.frame == 0 ) {
+      bigFridge.frame = 1;
     }
   }
 
@@ -437,6 +444,7 @@ function mousePressed() {
       coffeeFilter.x = 280;
       coffeeFilter.y = 313;
       bigEspresso.frame = 0;
+      coffeeFilter.spawn = true;
     }
 
     if(collision(bigCupDown) && coffee.spawn && !coffee.trashed){ 
@@ -452,23 +460,24 @@ function mousePressed() {
       }
     }
 
-    if(collision(bigEspresso) && coffeeFilter.moveable) {
+    if(collision(bigEspresso) && coffeeFilter.moveable && ((coffee.spawn && cupSet) || (!coffee.spawn))) {
       animateEspresso = true;
       coffeeFilter.moveable = false;
 
       let timer = setInterval(()=>{
         if (bigEspresso.frame < 10) {
           bigEspresso.frame ++;
+          coffeeFilter.spawn = false;
         }
         else {
           bigEspresso.frame = 10;
-          shot1.draw();
+          espressoMade = true;
           clearInterval(timer);
         }
       }, 500)
     }
 
-    if(collision(shot1) && !cupSet && coffee.spawn) {
+    if(collision(bigEspresso) && !cupSet && coffee.spawn && espressoMade) {
       bigEspresso.frame = 11;
     }
     
