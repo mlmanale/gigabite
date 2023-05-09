@@ -5,13 +5,17 @@ let syrup = false;
 let fridge = false;
 let freezer = false;
 let recipes = false;
+let gameOver = false;
 
 //timer and order stuff
-let orderTimer = 30;
+let orderTimer = 60;
 let order1 = false;
 let order2 = false;
 let order3 = false;
 let kitty1Img, kitty2Img, kitty3Img;
+let strike1 = false;
+let strike2 = false;
+let strike3 = false;
 
 
 //cup variables
@@ -25,6 +29,7 @@ let setcup;
 
 //syrup imgs
 let caramel, vanilla, mocha, brownSugar;
+let caramelCoffee = false;
 //cold latte images
 let cupimg, coldcup, icecup;
 //cup with syrup spritesheet
@@ -51,6 +56,21 @@ let fridgeOpen = false;
 let freezerOpen = false;
 
 let noteY = 655;
+let backImg, recipeImg;
+
+const sounds = new Tone.Players({
+  "click": "sounds/click.mp3",
+  "success": "sounds/success.mp3",
+  "open": "sounds/open.mp3",
+  "trash": "sounds/trash.mp3",
+  "cup": "sounds/cup.mp3",
+  "back": "sounds/back.mp3",
+  "coffee": "sounds/coffee.mp3",
+  "syrup": "sounds/syrup.mp3",
+  "set": "sounds/set.mp3",
+  "ice": "sounds/ice.mp3",
+  "milk": "sounds/milk.mp3"
+}).toDestination();
 
 //cup class
 
@@ -164,6 +184,8 @@ function preload() {
   kitty1Img = loadImage("img/kitty.png");
   kitty2Img = loadImage("img/kitty2.png");
   kitty3Img = loadImage("img/kitty3.png");
+  backImg = loadImage("img/backbutton.png");
+  recipeImg = loadImage("img/instructions.png");
 
   cupDown = new Item(setcup, 200, 310, 80, 50);
   bigCupDown = new Item(setcup, 200, 500, 160, 100);
@@ -189,7 +211,11 @@ function preload() {
   bigVanilla = new Item(vanilla, 375, 340, 125, 412.5);
   bigMocha = new Item(mocha, 525, 340, 125, 412.5);
   bigBS = new Item(brownSugar, 675, 340, 125, 412.5);
-  // shot1 = new Item(espressoShot, 597.5, 396, 150, 138);
+  kitty1 = new Item(kitty1Img, 70, 210, 90, 90);
+  kitty2 = new Item(kitty2Img, 170, 210, 90, 90);
+  kitty3 = new Item(kitty3Img, 270, 210, 90, 90);
+  back = new Item(backImg, 50, 50, 80, 80);
+  instructions = new Item(recipeImg, 795, 50, 190, 80);
 }
 
 function setup() {
@@ -203,33 +229,40 @@ function setup() {
 
 function draw() {
   background(220);
-  // if(gameStart) {
-  //   fill("black");
-  //   text("Press enter to begin!", width/2, height/2);
-  // }
+  if(gameStart) {
+   background("black");
+    push();
+      fill("white");
+      text("Press enter to begin!", width/2, height/2);
+    pop();
+  }
 
   if (frameCount % 60 == 0 && orderTimer > 0) { 
     orderTimer --;
   }
 
-  if(orderTimer <= 27) {
+  if(orderTimer <= 57) {
     order1 = true;
   }
 
-  if(orderTimer <= 20) {
+  if(orderTimer <= 50) {
     order2 = true;
   }
   
-  if(orderTimer <= 15) {
+  if(orderTimer <= 45) {
     order3 = true;
   }
 
-  if(!espresso && !syrup && !fridge && !freezer && !recipes) {
-    background("white");
-    
-    fill("gray");
-    rect(450, 225, 900, 250)
+  if(orderTimer == 0) {
+    gameOver = true;
+  }
+
+  if(!gameStart && !espresso && !syrup && !fridge && !freezer && !recipes & !gameOver) {
+    background(150,150,150);
   
+  
+    stroke("black");
+    strokeWeight(2);
     //counter
     fill(66,66,66);
     rect(450, 325, 900, 150)
@@ -276,22 +309,34 @@ function draw() {
     //set cup down
     cupDown.update();
 
-    fill("black");
-
     if(order1) {
+      fill("black");
       text("iced caramel latte", 135, 445); 
-      image(kitty1Img, 70, 210, 90, 90);
-  
+      kitty1.update();
+      if(strike1) {
+        fill("red");
+        rect(135, 440, 200, 5);
+      }
     }
 
     if(order2) {
+      fill("black");
       text("cup of milk", 135, 495);
-      image(kitty2Img, 170, 210, 90, 90);
+      kitty2.update();
+      if(strike2) {
+        fill("red");
+        rect(135, 490, 200, 5);
+      }
     }
 
     if(order3) {
+      fill("black");
       text("cup of ice", 135, 545);
-      image(kitty3Img, 270, 210, 90, 90);
+      kitty3.update();
+      if(strike3) {
+        fill("red");
+        rect(135, 540, 200, 5);
+      }
     }
  
   }
@@ -320,14 +365,6 @@ function draw() {
     coffeeFilter.w = 106;
     coffeeFilter.x = 355;
     coffeeFilter.y = 510;
-    
-
-    push();
-    fill(0,0,0, 127);
-    if ((mouseX >= 10 && mouseX <= 140) && (mouseY >= 100 && mouseY <= 150)) {
-      rect(75, 125, 130, 50); 
-    }
-    pop();
 
   }
 
@@ -338,13 +375,6 @@ function draw() {
     bigVanilla.update();
     bigMocha.update();
     bigBS.update();
-    
-    push();
-      fill(0,0,0, 127);
-      if ((mouseX >= 10 && mouseX <= 140) && (mouseY >= 100 && mouseY <= 150)) {
-        rect(75, 125, 130, 50); 
-      }
-    pop();
   } //END SYRUP
   
   if(freezer) {
@@ -358,13 +388,6 @@ function draw() {
     if(bigFreezer.frame == 1) {
         freezerOpen = true;
     }
-
-    push();
-      fill(0,0,0, 127);
-      if ((mouseX >= 10 && mouseX <= 140) && (mouseY >= 100 && mouseY <= 150)) {
-        rect(75, 125, 130, 50); 
-      }
-    pop();
   } //END FREEZER
 
   //FRIDGE
@@ -393,52 +416,89 @@ function draw() {
    }
 
    if (recipes) {
-     background("gray");
-     backButton();
+    background("gray");
+    backButton();
     
-     fill("white");
-     rect(450, 350, 600, 400);
+    fill("white");
+    rect(450, 350, 600, 400);
 
-     fill("black");
-     text("iced caramel latte", 450, 200);
+    fill("black");
+    text("iced caramel latte", 450, 200);
+    push();
+      textSize(17);
+      text("2 pumps of caramel syrup", 450, 230);
+      text("1 shot of espresso", 450, 260);
+      text("add milk, then ice", 450, 290);
+    pop();
+
+    text("cup of milk", 450, 350);
+    push();
+      textSize(17);
+      text("add milk to cup. 'nuff said", 450, 380);
+    pop();
+
+    text("cup of ice", 450, 440);
+    push();
+      textSize(17);
+      text("do i need to explain this one?", 450, 470);
+    pop();
    }
   
-  coffee.update();
+  if (!gameStart && !gameOver) {
+    coffee.update();
+    instructions.update();
 
-  //HUD and GUI
-  fill("yellow");
-  rect(185, 50, 350, 80);
-  rect(795, 50, 190, 80);
-
-  if ((mouseX >= 700 && mouseX <= 890) && (mouseY >= 10 && mouseY <= 90)) {
-    fill(0,0,0,127);
-    rect(795, 50, 190, 80);
+    push();
+      fill("black");
+      textSize(20);
+      text("instructions", 825, 55);
+    pop();
   }
-  fill("black");
-  text("instructions", 795, 50);
-  text(orderTimer, 20, 20);
 
+  if(gameOver) {
+    background("black");
+    push();
+      fill("white");
+      text("Good job!", width/2, height/2);
+      text("press ENTER to play again");
+    pop();
+  }
 }
 
+
+function keyPressed() {
+  if (keyCode === ENTER && gameStart) { 
+    gameStart = false;
+  }
+
+  if (keyCode === ENTER && gameOver) { 
+    gameStart = true;
+  }
+}
 function mousePressed() {
+  
   //back buttons and zoomed screen interactions
   if(syrup) {
-    if ((mouseX >= 10 && mouseX <= 140) && (mouseY >= 100 && mouseY <= 150)) {
+    if (collision(back)) {
+      sounds.player("back").start();
       syrup = false;
     }
 
     //caramel
     if (collision(bigCaramel) && coffee.spawn) {
+      sounds.player("syrup").start();
       if(frame == 0) {
         frame = 1;
       }
       else if(frame == 1) {
         frame = 5;
+        caramelCoffee = true;
       }
     }
 
     //vanilla
     if (collision(bigVanilla) && coffee.spawn) {
+      sounds.player("syrup").start();
       if(frame == 0) {
         frame = 4;
       }
@@ -449,6 +509,7 @@ function mousePressed() {
 
     //mocha 
     if (collision(bigMocha) && coffee.spawn) {
+      sounds.player("syrup").start();
       if(frame == 0) {
         frame = 3;
       }
@@ -459,6 +520,7 @@ function mousePressed() {
 
     //brown sugar 
     if (collision(bigBS) && coffee.spawn) {
+      sounds.player("syrup").start();
       if(frame == 0) {
         frame = 2;
       }
@@ -469,17 +531,20 @@ function mousePressed() {
   }
   
   if(freezer) {
-    if ((mouseX >= 10 && mouseX <= 140) && (mouseY >= 100 && mouseY <= 150)) {
+    if (collision(back)) {
+      sounds.player("back").start();
       freezer = false;
       freezerOpen = false;
       bigFreezer.frame = 0;
     }
 
     if (collision(bigFreezer) && !freezerOpen) { 
+        sounds.player("open").start();
         bigFreezer.frame = 1;
     }
 
     if(collision(bigFreezer) && coffee.spawn && !cupSet && bigFreezer.frame == 1 && freezerOpen){
+      sounds.player("ice").start();
       if(frame == 0) {
         frame = 12;
       }
@@ -490,12 +555,14 @@ function mousePressed() {
   }
 
   if(fridge) {
-    if ((mouseX >= 10 && mouseX <= 140) && (mouseY >= 100 && mouseY <= 150)) {
+    if (collision(back)) {
+      sounds.player("back").start();
       fridge = false;
       bigFridge.frame = 0;
     }
 
     if(collision(bigMilk) && coffee.spawn && !cupSet && bigFridge.frame == 1) {
+      sounds.player("milk").start();
       if(frame == 0) {
         frame = 13;
       }
@@ -505,13 +572,15 @@ function mousePressed() {
     }
 
     if(collision(bigFridge) && bigFridge.frame == 0 ) {
+      sounds.player("open").start();
       bigFridge.frame = 1;
     } 
   }
 
 
   if(espresso) {
-    if ((mouseX >= 10 && mouseX <= 140) && (mouseY >= 100 && mouseY <= 150)) {
+    if (collision(back)) {
+      sounds.player("back").start();
       espresso = false;
       coffeeFilter.moveable = false;
       coffeeFilter.h =  43;
@@ -523,6 +592,7 @@ function mousePressed() {
     }
 
     if(collision(bigCupDown) && coffee.spawn && !coffee.trashed){ 
+      sounds.player("set").start();
       if(!cupSet){
         cupSet= true;
       }
@@ -532,12 +602,16 @@ function mousePressed() {
     if(collision(coffeeFilter)) {
       if((coffee.spawn && cupSet) || !coffee.spawn){
         coffeeFilter.moveable = true;
+        sounds.player("cup").start();
       }
     }
 
     if(collision(bigEspresso) && coffeeFilter.moveable && ((coffee.spawn && cupSet) || (!coffee.spawn))) {
       animateEspresso = true;
       coffeeFilter.moveable = false;
+      sounds.player("click").start();
+      sounds.player("coffee").start();
+
 
       let timer = setInterval(()=>{
         if (bigEspresso.frame < 10) {
@@ -555,48 +629,96 @@ function mousePressed() {
     if(collision(bigEspresso) && !cupSet && coffee.spawn && espressoMade) {
       bigEspresso.frame = 11;
       frame = 9;
+      sounds.player("milk").start();
     }
   }
 
   if(recipes) {
-    if ((mouseX >= 10 && mouseX <= 140) && (mouseY >= 100 && mouseY <= 150)) {
+    if (collision(back)) {
+      sounds.player("back").start();
       recipes = false;
     }
   }
 
   //enter zoomed screens, main screen interactions
   if(!espresso && !syrup && !fridge && !freezer) {
+
+    //first order
+    if(collision(kitty1) && caramelCoffee && frame == 11) {
+
+      kitty1.spawn = false;
+      sounds.player("success").start();
+      coffee.trashed = true;
+      strike1 = true;
+      setTimeout(()=>{
+        coffee.trashed = false;
+        coffee.spawn = false;
+        coffee.ice = false;
+        frame = 0;
+        caramelCoffee = false;
+      }, 500)
+    }
+    if(collision(kitty2) && frame == 13) {
+      sounds.player("success").start();
+      kitty2.spawn = false;
+      coffee.trashed = true;
+      strike2 = true;
+      setTimeout(()=>{
+        coffee.trashed = false;
+        coffee.spawn = false;
+        coffee.ice = false;
+        frame = 0;
+      }, 500)
+    }
+    if(collision(kitty3) && frame == 12) {
+      sounds.player("success").start();
+      kitty3.spawn = false;
+      coffee.trashed = true;
+      strike3 = true;
+      setTimeout(()=>{
+        coffee.trashed = false;
+        coffee.spawn = false;
+        coffee.ice = false;
+        frame = 0;
+      }, 500)
+    }
     //espresso
     if (collision(espressoMachine)) {
+      sounds.player("click").start();
       espresso = true;
     }
     //syrups
     else if (collision(caramelSyrup) || collision(vanillaSyrup) || collision(mochaSyrup) || collision(bsSyrup)) {
+      sounds.player("click").start();
       syrup = true;
     }
     //cold cup
     else if (collision(cups1)) {
+      sounds.player("cup").start();
       coffee.spawn = true;
       // console.log("cold cup");
     }
     //hot cups
     else if (collision(cups2)) {
+      sounds.player("cup").start();
       coffee.spawn = true;
       // console.log("hot cup");
     }
     //freezer
     else if (collision(smallFreezer)) {
+      sounds.player("click").start();
       freezer = true;
     }
     //fridge
     else if (collision(smallFridge)) {
+      sounds.player("click").start();
       fridge = true;
     }
     //trash
     else if (collision(trash) && !cupSet && coffee.spawn) {
+      sounds.player("trash").start();
       coffee.trashed = true;
       trash.frame = 1;
-      console.log("pressed trash");
       setTimeout(()=>{
         coffee.trashed = false;
         coffee.spawn = false;
@@ -608,27 +730,24 @@ function mousePressed() {
 
     //set cup down
     if(collision(cupDown) && coffee.spawn && !coffee.trashed){ 
+      sounds.player("set").start();
       if(!cupSet){
         cupSet = true;
       }
       else {cupSet = false;}
     }
+    // if(collision())
     }
 
     //recipes
-    if ((mouseX >= 700 && mouseX <= 890) && (mouseY >= 10 && mouseY <= 90) && !recipes) { 
+    if (collision(instructions)) { 
+      sounds.player("click").start();
       recipes = true;
     }
 }
 
 function backButton () {
-  fill("yellow");
-  rect(75, 125, 130, 50)
-
-  fill(0,0,0, 127);
-  if ((mouseX >= 10 && mouseX <= 140) && (mouseY >= 100 && mouseY <= 150)) {
-    rect(75, 125, 130, 50); 
-  }
+  back.update();
 }
 
 function orderNote () {
